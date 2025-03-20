@@ -13,15 +13,16 @@ from bfcl.model_handler.api_inference.nexus import NexusHandler
 from bfcl.model_handler.api_inference.nova import NovaHandler
 from bfcl.model_handler.api_inference.nvidia import NvidiaHandler
 from bfcl.model_handler.api_inference.openai import OpenAIHandler
+from bfcl.model_handler.api_inference.stackone import StackOneHandler
 from bfcl.model_handler.api_inference.writer import WriterHandler
-from bfcl.model_handler.api_inference.yi import YiHandler
 from bfcl.model_handler.local_inference.bielik import BielikHandler
 from bfcl.model_handler.local_inference.deepseek import DeepseekHandler
 from bfcl.model_handler.local_inference.deepseek_coder import DeepseekCoderHandler
-from bfcl.model_handler.local_inference.deepseek_reasoning import DeepseekReasoningHandler
+from bfcl.model_handler.local_inference.deepseek_reasoning import (
+    DeepseekReasoningHandler,
+)
 from bfcl.model_handler.local_inference.falcon_fc import Falcon3FCHandler
 from bfcl.model_handler.local_inference.gemma import GemmaHandler
-from bfcl.model_handler.local_inference.glaive import GlaiveHandler
 from bfcl.model_handler.local_inference.glm import GLMHandler
 from bfcl.model_handler.local_inference.granite import GraniteHandler
 from bfcl.model_handler.local_inference.hammer import HammerHandler
@@ -32,7 +33,6 @@ from bfcl.model_handler.local_inference.minicpm import MiniCPMHandler
 from bfcl.model_handler.local_inference.minicpm_fc import MiniCPMFCHandler
 from bfcl.model_handler.local_inference.mistral_fc import MistralFCHandler
 from bfcl.model_handler.local_inference.phi import PhiHandler
-from bfcl.model_handler.local_inference.quick_testing_oss import QuickTestingOSSHandler
 from bfcl.model_handler.local_inference.qwen import QwenHandler
 from bfcl.model_handler.local_inference.qwen_fc import QwenFCHandler
 from bfcl.model_handler.local_inference.salesforce import SalesforceHandler
@@ -41,6 +41,8 @@ from bfcl.model_handler.local_inference.salesforce import SalesforceHandler
 
 # Inference through API calls
 api_inference_handler_map = {
+    "stackone-agent-v0": StackOneHandler,
+    "stackone-base-v0": StackOneHandler,
     "gorilla-openfunctions-v2": GorillaHandler,
     "DeepSeek-R1": DeepSeekAPIHandler,
     "DeepSeek-V3-FC": DeepSeekAPIHandler,

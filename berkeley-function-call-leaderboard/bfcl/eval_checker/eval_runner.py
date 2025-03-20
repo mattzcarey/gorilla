@@ -1,8 +1,9 @@
 import argparse
 
+from dotenv import load_dotenv
+from tqdm import tqdm
+
 from bfcl.constants.category_mapping import (
-    TEST_COLLECTION_MAPPING,
-    TEST_FILE_MAPPING,
     VERSION_PREFIX,
 )
 from bfcl.constants.eval_config import (
@@ -22,13 +23,10 @@ from bfcl.eval_checker.executable_eval.executable_checker import (
 )
 from bfcl.eval_checker.multi_turn_eval.multi_turn_checker import (
     multi_turn_checker,
-    multi_turn_irrelevance_checker,
 )
 from bfcl.eval_checker.multi_turn_eval.multi_turn_utils import is_empty_execute_response
 from bfcl.model_handler.handler_map import HANDLER_MAP
 from bfcl.utils import *
-from dotenv import load_dotenv
-from tqdm import tqdm
 
 
 def get_handler(model_name):
@@ -40,9 +38,9 @@ def get_handler(model_name):
 def multi_turn_runner(
     handler, model_result, prompt, possible_answer, model_name, test_category, score_dir
 ):
-    assert (
-        len(model_result) == len(prompt) == len(possible_answer)
-    ), f"The length of the model result ({len(model_result)}) does not match the length of the prompt ({len(prompt)}) or possible answer ({len(possible_answer)}). Please check the input files for completeness."
+    assert len(model_result) == len(prompt) == len(possible_answer), (
+        f"The length of the model result ({len(model_result)}) does not match the length of the prompt ({len(prompt)}) or possible answer ({len(possible_answer)}). Please check the input files for completeness."
+    )
 
     result = []
     correct_count = 0
@@ -50,7 +48,9 @@ def multi_turn_runner(
         index: str = model_result[i]["id"]
         # Model result is stored as a list of list of model responses. Each inner list represents a turn.
         multi_turn_model_result_list: list[list] = model_result[i]["result"]
-        multi_turn_ground_truth_list: list[list[str]] = possible_answer[i]["ground_truth"]
+        multi_turn_ground_truth_list: list[list[str]] = possible_answer[i][
+            "ground_truth"
+        ]
         test_entry: dict = prompt[i]
 
         # Remove the function doc from the score file for better readability; they are repeated and way too long
@@ -98,23 +98,25 @@ def multi_turn_runner(
             )
             continue
 
-        multi_turn_model_result_list_decoded: list[list[list[str]]] = (
-            []
-        )  # decode_execute returns a list of strings
+        multi_turn_model_result_list_decoded: list[
+            list[list[str]]
+        ] = []  # decode_execute returns a list of strings
         # Try decoding the model results into executable function calls
         for single_turn_model_result_list in multi_turn_model_result_list:
             single_turn_model_result_list_decoded = []
             for model_result_item in single_turn_model_result_list:
                 # model_result_item is per step
                 try:
-                    decoded_result: list[str] = handler.decode_execute(model_result_item)
+                    decoded_result: list[str] = handler.decode_execute(
+                        model_result_item
+                    )
                     if is_empty_execute_response(decoded_result):
                         # Empty output is not considered as a valid function call
                         continue
 
                     single_turn_model_result_list_decoded.append(decoded_result)
 
-                except Exception as e:
+                except Exception:
                     # Ignore any failed decoding and continue to the next message
                     # We only care about the decoded function call, not the error message or if the model is chatting
                     continue
@@ -321,7 +323,7 @@ def relevance_file_runner(
             temp["valid"] = success
             if "irrelevance" in test_category:
                 temp["error"] = [
-                    f"Valid syntax. Successfully decode AST when it should not."
+                    "Valid syntax. Successfully decode AST when it should not."
                 ]
                 temp["error_type"] = "irrelevance_error:decoder_success"
             else:
@@ -361,9 +363,9 @@ def ast_file_runner(
     model_name,
     score_dir,
 ):
-    assert (
-        len(model_result) == len(prompt) == len(possible_answer)
-    ), f"The length of the model result ({len(model_result)}) does not match the length of the prompt ({len(prompt)}) or possible answer ({len(possible_answer)}). Please check the input files for completeness."
+    assert len(model_result) == len(prompt) == len(possible_answer), (
+        f"The length of the model result ({len(model_result)}) does not match the length of the prompt ({len(prompt)}) or possible answer ({len(possible_answer)}). Please check the input files for completeness."
+    )
 
     result = []
     correct_count = 0
@@ -455,7 +457,6 @@ def ast_file_runner(
 
 #### Main runner function ####
 def runner(model_names, test_categories, api_sanity_check, result_dir, score_dir):
-
     # State udpated by each eval subtask.
     state = dict(
         # Flags to indicate if the API has been tested.
@@ -485,7 +486,6 @@ def runner(model_names, test_categories, api_sanity_check, result_dir, score_dir
 
     # Traverse each subdirectory
     for subdir in tqdm(subdirs, desc="Number of models evaluated"):
-
         model_name = subdir.relative_to(result_dir).name
         if model_names is not None and model_name not in model_names:
             continue
@@ -523,7 +523,9 @@ def runner(model_names, test_categories, api_sanity_check, result_dir, score_dir
     # This function reads all the score files from local folder and updates the
     # leaderboard table. This is helpful when you only want to run the
     # evaluation for a subset of models and test categories.
-    update_leaderboard_table_with_local_score_file(state["leaderboard_table"], score_dir)
+    update_leaderboard_table_with_local_score_file(
+        state["leaderboard_table"], score_dir
+    )
     # Write the leaderboard table to a file
     generate_leaderboard_csv(
         state["leaderboard_table"], score_dir, model_names, test_categories
@@ -552,7 +554,6 @@ def evaluate_task(
     handler,
     state,
 ):
-
     language = "Python"
     if is_java(test_category):
         language = "Java"
@@ -595,10 +596,9 @@ def evaluate_task(
 
             state["api_tested"] = True
 
-        if (
-            test_category not in state["executable_test_categories_have_run"]
-            and not is_rest(test_category)
-        ):
+        if test_category not in state[
+            "executable_test_categories_have_run"
+        ] and not is_rest(test_category):
             print(
                 f"---- Getting real-time execution result from ground truth"
                 f" for {test_category} ----"
@@ -619,7 +619,9 @@ def evaluate_task(
 
     else:
         # Find the corresponding possible answer file
-        possible_answer_file = find_file_with_suffix(POSSIBLE_ANSWER_PATH, test_category)
+        possible_answer_file = find_file_with_suffix(
+            POSSIBLE_ANSWER_PATH, test_category
+        )
         possible_answer = load_file(possible_answer_file, sort_by_id=True)
 
         if is_multi_turn(test_category):
@@ -744,7 +746,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    load_dotenv(dotenv_path=DOTENV_PATH, verbose=True, override=True)  # Load the .env file
+    load_dotenv(
+        dotenv_path=DOTENV_PATH, verbose=True, override=True
+    )  # Load the .env file
     main(
         args.model,
         args.test_category,

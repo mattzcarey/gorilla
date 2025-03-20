@@ -8,6 +8,18 @@ from bfcl.model_handler.handler_map import local_inference_handler_map
 #     model_license,
 # ]}
 MODEL_METADATA_MAPPING = {
+    "stackone-agent-v0": [
+        "StackOne-Agent-v0 (FC)",
+        "coming soon",
+        "StackOne",
+        "Proprietary",
+    ],
+    "stackone-base-v0": [
+        "StackOne-Base-v0 (FC)",
+        "coming soon",
+        "StackOne",
+        "Proprietary",
+    ],
     "gorilla-openfunctions-v2": [
         "Gorilla-OpenFunctions-v2 (FC)",
         "https://gorilla.cs.berkeley.edu/blogs/7_open_functions_v2.html",
@@ -937,7 +949,7 @@ MODEL_METADATA_MAPPING = {
         "https://huggingface.co/BitAgent/BitAgent-8B/",
         "Bittensor",
         "Apache-2.0",
-    ]
+    ],
 }
 
 INPUT_PRICE_PER_MILLION_TOKEN = {
@@ -1094,4 +1106,6 @@ NO_COST_MODELS += [
     "meetkai/functionary-medium-v3.1-FC",
     "snowflake/arctic",
     "nvidia/nemotron-4-340b-instruct",
+    "stackone-agent-v0",
+    "stackone-base-v0",
 ]

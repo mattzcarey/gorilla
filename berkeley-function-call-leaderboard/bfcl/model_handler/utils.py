@@ -7,17 +7,18 @@ import re
 from functools import reduce
 from typing import Callable, List, Optional, Type, Union
 
-from bfcl.constants.default_prompts import DEFAULT_SYSTEM_PROMPT
-from bfcl.constants.type_mappings import GORILLA_TO_OPENAPI
-from bfcl.model_handler.model_style import ModelStyle
-from bfcl.model_handler.parser.java_parser import parse_java_function_call
-from bfcl.model_handler.parser.js_parser import parse_javascript_function_call
 from tenacity import (
     retry,
     retry_if_exception_message,
     retry_if_exception_type,
     wait_random_exponential,
 )
+
+from bfcl.constants.default_prompts import DEFAULT_SYSTEM_PROMPT
+from bfcl.constants.type_mappings import GORILLA_TO_OPENAPI
+from bfcl.model_handler.model_style import ModelStyle
+from bfcl.model_handler.parser.java_parser import parse_java_function_call
+from bfcl.model_handler.parser.js_parser import parse_javascript_function_call
 
 
 def _cast_to_openai_type(properties, mapping):
@@ -47,7 +48,9 @@ def _cast_to_openai_type(properties, mapping):
                     properties[key]["properties"], mapping
                 )
             elif "items" in properties[key]:
-                properties[key]["items"]["type"] = mapping[properties[key]["items"]["type"]]
+                properties[key]["items"]["type"] = mapping[
+                    properties[key]["items"]["type"]
+                ]
                 if (
                     properties[key]["items"]["type"] == "array"
                     and "items" in properties[key]["items"]
@@ -113,25 +116,27 @@ def convert_to_tool(functions, mapping, model_style):
                     del params["optional"]
                 # No `maximum` field.
                 if "maximum" in params:
-                    params["description"] += f" Maximum value: {str(params['maximum'])}."
+                    params["description"] += (
+                        f" Maximum value: {str(params['maximum'])}."
+                    )
                     del params["maximum"]
                 # No `minItems` field.
                 if "minItems" in params:
-                    params[
-                        "description"
-                    ] += f" Minimum number of items: {str(params['minItems'])}."
+                    params["description"] += (
+                        f" Minimum number of items: {str(params['minItems'])}."
+                    )
                     del params["minItems"]
                 # No `maxItems` field.
                 if "maxItems" in params:
-                    params[
-                        "description"
-                    ] += f" Maximum number of items: {str(params['maxItems'])}."
+                    params["description"] += (
+                        f" Maximum number of items: {str(params['maxItems'])}."
+                    )
                     del params["maxItems"]
                 # No `additionalProperties` field.
                 if "additionalProperties" in params:
-                    params[
-                        "description"
-                    ] += f" Additional properties: {str(params['additionalProperties'])}."
+                    params["description"] += (
+                        f" Additional properties: {str(params['additionalProperties'])}."
+                    )
                     del params["additionalProperties"]
                 # For Gemini, only `enum` field when the type is `string`.
                 # For Palmyra, `enum` field is not supported.
@@ -151,9 +156,9 @@ def convert_to_tool(functions, mapping, model_style):
                 ModelStyle.WRITER,
                 ModelStyle.AMAZON,
             ]:
-                item[
-                    "description"
-                ] += f" The response field has the following schema: {json.dumps(item['response'])}"
+                item["description"] += (
+                    f" The response field has the following schema: {json.dumps(item['response'])}"
+                )
                 del item["response"]
 
         if model_style in [
@@ -177,16 +182,21 @@ def convert_to_tool(functions, mapping, model_style):
 
 
 def convert_to_function_call(function_call_list):
-    if type(function_call_list) == dict:
+    print("using convert_to_function_call")
+    print(function_call_list)
+    if isinstance(function_call_list, str):
+        print("Not a function call list:", function_call_list)
+        return []
+    if isinstance(function_call_list, dict):
         function_call_list = [function_call_list]
     # function_call_list is of type list[dict[str, str]] or list[dict[str, dict]]
     execution_list = []
     for function_call in function_call_list:
         for key, value in function_call.items():
-            if type(value) == str:
+            if isinstance(value, str):
                 value = json.loads(value)
             execution_list.append(
-                f"{key}({','.join([f'{k}={repr(v)}' for k,v in value.items()])})"
+                f"{key}({','.join([f'{k}={repr(v)}' for k, v in value.items()])})"
             )
 
     return execution_list
@@ -381,17 +391,17 @@ def func_doc_language_specific_pre_processing(function, test_category):
         if test_category == "java":
             for key, value in properties.items():
                 if value["type"] == "any":
-                    properties[key][
-                        "description"
-                    ] += " This parameter can be of any type of Java object in string representation."
+                    properties[key]["description"] += (
+                        " This parameter can be of any type of Java object in string representation."
+                    )
                 else:
-                    value[
-                        "description"
-                    ] += f" This is Java {value['type']} type parameter in string representation."
+                    value["description"] += (
+                        f" This is Java {value['type']} type parameter in string representation."
+                    )
                 if value["type"] == "ArrayList" or value["type"] == "Array":
-                    value[
-                        "description"
-                    ] += f" The list elements are of type {value['items']['type']}; they are not in string representation."
+                    value["description"] += (
+                        f" The list elements are of type {value['items']['type']}; they are not in string representation."
+                    )
                     del value["items"]
 
                 value["type"] = "string"
@@ -399,24 +409,24 @@ def func_doc_language_specific_pre_processing(function, test_category):
         elif test_category == "javascript":
             for key, value in properties.items():
                 if value["type"] == "any":
-                    properties[key][
-                        "description"
-                    ] += " This parameter can be of any type of JavaScript object in string representation."
+                    properties[key]["description"] += (
+                        " This parameter can be of any type of JavaScript object in string representation."
+                    )
                 else:
-                    value[
-                        "description"
-                    ] += f" This is JavaScript {value['type']} type parameter in string representation."
+                    value["description"] += (
+                        f" This is JavaScript {value['type']} type parameter in string representation."
+                    )
                 if value["type"] == "array":
-                    value[
-                        "description"
-                    ] += f" The list elements are of type {value['items']['type']}; they are not in string representation."
+                    value["description"] += (
+                        f" The list elements are of type {value['items']['type']}; they are not in string representation."
+                    )
                     del value["items"]
 
                 if value["type"] == "dict":
                     if "properties" in value:  # not every dict has properties
-                        value[
-                            "description"
-                        ] += f" The dictionary entries have the following schema; they are not in string representation. {json.dumps(value['properties'])}"
+                        value["description"] += (
+                            f" The dictionary entries have the following schema; they are not in string representation. {json.dumps(value['properties'])}"
+                        )
                         del value["properties"]
 
                 value["type"] = "string"
@@ -509,7 +519,9 @@ def _function_calls_valid_format_and_invoke_extraction(last_completion):
         return {"status": True, "invokes": []}
 
     # Extract content between <function_calls> tags. If there are multiple we will only parse the first and ignore the rest, regardless of their correctness.
-    match = re.search(r"<function_calls>(.*)</function_calls>", last_completion, re.DOTALL)
+    match = re.search(
+        r"<function_calls>(.*)</function_calls>", last_completion, re.DOTALL
+    )
     if not match:
         return {
             "status": False,
@@ -546,7 +558,9 @@ def _function_calls_valid_format_and_invoke_extraction(last_completion):
                 "reason": "More than one tool_name specified inside single set of <invoke></invoke> tags.",
             }
 
-        parameters = re.findall(r"<parameters>.*?</parameters>", invoke_string, re.DOTALL)
+        parameters = re.findall(
+            r"<parameters>.*?</parameters>", invoke_string, re.DOTALL
+        )
         if not parameters:
             return {
                 "status": False,
@@ -644,7 +658,9 @@ def extract_system_prompt(prompts: list[dict]) -> str:
     return None
 
 
-def extract_last_user_message(prompts: list[dict], user_role_name: str = "user") -> dict:
+def extract_last_user_message(
+    prompts: list[dict], user_role_name: str = "user"
+) -> dict:
     for i in range(len(prompts) - 1, -1, -1):
         if prompts[i]["role"] == user_role_name:
             last_user_message = prompts[i]
@@ -665,7 +681,11 @@ def format_execution_results_prompting(
         execution_results, model_response_data["model_responses_decoded"]
     ):
         tool_results.append(
-            {"role": "tool", "name": decoded_model_response, "content": execution_result}
+            {
+                "role": "tool",
+                "name": decoded_model_response,
+                "content": execution_result,
+            }
         )
 
     return repr(tool_results)
@@ -706,7 +726,9 @@ def parse_nested_value(value):
         if all(isinstance(v, dict) for v in value.values()):
             func_name = list(value.keys())[0]
             args = value[func_name]
-            args_str = ", ".join(f"{k}={parse_nested_value(v)}" for k, v in args.items())
+            args_str = ", ".join(
+                f"{k}={parse_nested_value(v)}" for k, v in args.items()
+            )
             return f"{func_name}({args_str})"
         else:
             # If it's a simple dictionary, treat it as key-value pairs
@@ -731,7 +753,9 @@ def decoded_output_to_execution_list(decoded_output):
     execution_list = []
     for function_call in decoded_output:
         for key, value in function_call.items():
-            args_str = ", ".join(f"{k}={parse_nested_value(v)}" for k, v in value.items())
+            args_str = ", ".join(
+                f"{k}={parse_nested_value(v)}" for k, v in value.items()
+            )
             execution_list.append(f"{key}({args_str})")
     return execution_list
 

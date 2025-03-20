@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 VLLM_PORT = 1053
@@ -7,11 +8,14 @@ REAL_TIME_MATCH_ALLOWED_DIFFERENCE = 0.2
 # The root directory of the project, relative to the current file location
 PROJECT_ROOT = "../../"
 
+# Allow overriding the data directory through environment variable
+DATA_DIR = os.getenv("BFCL_DATA_DIR", "data")
+
 # NOTE: These paths are relative to the PROJECT_ROOT directory.
 RESULT_PATH = "./result/"
-PROMPT_PATH = "./data/"
-MULTI_TURN_FUNC_DOC_PATH = "./data/multi_turn_func_doc/"
-POSSIBLE_ANSWER_PATH = "./data/possible_answer/"
+PROMPT_PATH = f"./{DATA_DIR}/"
+MULTI_TURN_FUNC_DOC_PATH = f"./{DATA_DIR}/multi_turn_func_doc/"
+POSSIBLE_ANSWER_PATH = f"./{DATA_DIR}/possible_answer/"
 SCORE_PATH = "./score/"
 DOTENV_PATH = "./.env"
 UTILS_PATH = "./utils/"
@@ -20,9 +24,7 @@ TEST_IDS_TO_GENERATE_PATH = "./test_case_ids_to_generate.json"
 REST_API_GROUND_TRUTH_FILE_PATH = (
     "./bfcl/eval_checker/executable_eval/data/api_status_check_ground_truth_REST.json"
 )
-EXECTUABLE_API_GROUND_TRUTH_FILE_PATH = (
-    "./bfcl/eval_checker/executable_eval/data/api_status_check_ground_truth_executable.json"
-)
+EXECTUABLE_API_GROUND_TRUTH_FILE_PATH = "./bfcl/eval_checker/executable_eval/data/api_status_check_ground_truth_executable.json"
 
 # This is the ground truth file for the `rest` test category
 REST_EVAL_GROUND_TRUTH_PATH = (
@@ -32,6 +34,8 @@ REST_EVAL_GROUND_TRUTH_PATH = (
 
 UNDERSCORE_TO_DOT = [
     # TODO: Use the model style to determine this, single source of truth
+    "stackone-agent-v0",
+    "stackone-base-v0",
     "DeepSeek-V3-FC",
     "gpt-4.5-preview-2025-02-27-FC",
     "o1-2024-12-17-FC",
@@ -87,7 +91,9 @@ RESET = "\033[0m"
 script_dir = Path(__file__).parent
 PROJECT_ROOT = (script_dir / PROJECT_ROOT).resolve()
 
-REST_API_GROUND_TRUTH_FILE_PATH = (PROJECT_ROOT / REST_API_GROUND_TRUTH_FILE_PATH).resolve()
+REST_API_GROUND_TRUTH_FILE_PATH = (
+    PROJECT_ROOT / REST_API_GROUND_TRUTH_FILE_PATH
+).resolve()
 EXECTUABLE_API_GROUND_TRUTH_FILE_PATH = (
     PROJECT_ROOT / EXECTUABLE_API_GROUND_TRUTH_FILE_PATH
 ).resolve()

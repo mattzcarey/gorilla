@@ -67,20 +67,22 @@ pip install -e .
 
 For locally hosted models, choose one of the following backends, ensuring you have the right GPU and OS setup:
 
-`sglang` is *much faster* than `vllm` but only supports newer GPUs with SM 80+ (Ampere etc).
+`sglang` is _much faster_ than `vllm` but only supports newer GPUs with SM 80+ (Ampere etc).
 If you are using an older GPU (T4/V100), you should use `vllm` instead as it supports a much wider range of GPUs.
 
 **Using `vllm`:**
+
 ```bash
 pip install -e .[oss_eval_vllm]
 ```
 
 **Using `sglang`:**
+
 ```bash
 pip install -e .[oss_eval_sglang]
 ```
 
-*Optional:* If using `sglang`, we recommend installing `flashinfer` for speedups. Find instructions [here](https://docs.flashinfer.ai/installation.html).
+_Optional:_ If using `sglang`, we recommend installing `flashinfer` for speedups. Find instructions [here](https://docs.flashinfer.ai/installation.html).
 
 ### Setting up Environment Variables
 
@@ -92,6 +94,10 @@ cp .env.example .env
 ```
 
 If you are running any proprietary models, make sure the model API keys are included in your `.env` file. Models like GPT, Claude, Mistral, Gemini, Nova, will require them.
+
+You can also configure the following optional environment variables:
+
+- `BFCL_DATA_DIR`: Override the default data directory (default: "data"). This allows you to use a different directory for test data, such as a sampled subset.
 
 ### API Keys for Executable Test Categories
 
@@ -145,7 +151,7 @@ bfcl generate --model MODEL_NAME --test-category TEST_CATEGORY --num-threads 1
 ```
 
 - Use `--num-threads` to control the level of parallel inference. The default (`1`) means no parallelization.
-- The maximum allowable threads depends on your API’s rate limits.
+- The maximum allowable threads depends on your API's rate limits.
 
 #### For Locally-hosted OSS Models
 

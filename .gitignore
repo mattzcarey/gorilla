@@ -27,6 +27,7 @@ berkeley-function-call-leaderboard/score/
 
 # Ignore environment variables
 berkeley-function-call-leaderboard/.env
+berkeley-function-call-leaderboard/data_*
 !berkeley-function-call-leaderboard/.env.example
 
 # Ignore multi turn ground truth conversation log
